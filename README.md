@@ -113,7 +113,7 @@ The smolagents `ToolCallingAgent` has access to these tools via `epsteinexposed`
 ## Related Projects
 
 - [epsteinexposed](https://github.com/guilyx/epsteinexposed) — Python client for the Epstein Exposed API
-- [epstein-files-mcp](https://github.com/guilyx/epstein-files-mcp) — MCP server wrapping the same API
+- [epsteinexposed-mcp](https://github.com/guilyx/epsteinexposed-mcp) — MCP server wrapping the same API
 - [LinkedStein](https://github.com/guilyx/LinkedStein) — LinkedIn x Epstein files cross-reference tool
 
 ## License
