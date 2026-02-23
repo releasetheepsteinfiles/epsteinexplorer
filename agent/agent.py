@@ -37,7 +37,7 @@ class EpsteinAgent:
     def __init__(self) -> None:
         model = LiteLLMModel(
             model_id=agent_settings.llm_model,
-            api_key=agent_settings.litellm_api_key,
+            api_key=agent_settings.openrouter_api_key,
         )
         self._agent = ToolCallingAgent(
             tools=ALL_TOOLS,

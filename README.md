@@ -55,10 +55,9 @@ A full-stack chatbot that lets you explore persons, documents, flight logs, and 
 ### Docker Compose (recommended)
 
 ```bash
-# Set your LLM API key
-export LITELLM_API_KEY=sk-...
+cp .env.example .env
+# Edit .env → add your OPENROUTER_API_KEY
 
-# Start everything
 docker compose up --build
 
 # Frontend: http://localhost:3000
@@ -73,7 +72,7 @@ docker compose up --build
 ```bash
 cd backend
 pip install -e ".[dev]"
-cp .env.example .env  # add your LITELLM_API_KEY
+cp ../.env.example ../.env  # add your OPENROUTER_API_KEY
 
 # Start Postgres (or use docker compose up db)
 alembic upgrade head
@@ -93,9 +92,9 @@ npm run dev
 
 | Variable | Default | Description |
 |---|---|---|
-| `DATABASE_URL` | `postgresql+asyncpg://explorer:explorer@localhost:5432/epsteinexplorer` | Async SQLAlchemy DB URL |
-| `LLM_MODEL` | `gpt-4o-mini` | LiteLLM model identifier |
-| `LITELLM_API_KEY` | | API key for the LLM provider |
+| `DATABASE_URL` | `postgresql+asyncpg://...@localhost:5432/epsteinexplorer` | Async SQLAlchemy DB URL |
+| `LLM_MODEL` | `openrouter/google/gemini-2.0-flash-001` | LiteLLM model identifier (any [OpenRouter model](https://openrouter.ai/models)) |
+| `OPENROUTER_API_KEY` | | Your OpenRouter API key |
 | `CORS_ORIGINS` | `http://localhost:5173,http://localhost:3000` | Allowed CORS origins |
 
 ## Agent Tools
