@@ -42,7 +42,7 @@ class EpsteinAgent:
         self._agent = ToolCallingAgent(
             tools=ALL_TOOLS,
             model=model,
-            system_prompt=SYSTEM_PROMPT,
+            prompt_templates={"system_prompt": SYSTEM_PROMPT},
         )
         logger.info(
             "EpsteinAgent initialised with model=%s, tools=%d",
