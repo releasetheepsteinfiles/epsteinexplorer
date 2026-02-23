@@ -6,12 +6,12 @@ WORKDIR /app
 RUN pip install --no-cache-dir uv
 
 COPY backend/pyproject.toml .
-RUN uv pip install --system -e "."
-
 COPY backend/app/ app/
 COPY agent/ agent/
 COPY backend/alembic.ini .
 COPY backend/alembic/ alembic/
+
+RUN uv pip install --system .
 
 EXPOSE 8000
 
