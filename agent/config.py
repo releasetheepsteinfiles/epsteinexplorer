@@ -7,8 +7,8 @@ from pydantic_settings import BaseSettings
 
 
 class AgentSettings(BaseSettings):
-    llm_model: str = "gpt-4o-mini"
-    litellm_api_key: str = ""
+    llm_model: str = "openrouter/google/gemini-2.0-flash-001"
+    openrouter_api_key: str = ""
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 

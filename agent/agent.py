@@ -3,9 +3,11 @@
 
 from __future__ import annotations
 
+import importlib.resources
 import logging
 from typing import Any
 
+import yaml
 from smolagents import LiteLLMModel, ToolCallingAgent
 
 from agent.config import agent_settings
@@ -28,6 +30,17 @@ SYSTEM_PROMPT = (
 )
 
 
+def _build_prompt_templates() -> dict:
+    """Load smolagents default templates and override the system prompt."""
+    defaults = yaml.safe_load(
+        importlib.resources.files("smolagents.prompts")
+        .joinpath("toolcalling_agent.yaml")
+        .read_text()
+    )
+    defaults["system_prompt"] = SYSTEM_PROMPT
+    return defaults
+
+
 class EpsteinAgent:
     """Reusable agent instance wrapping smolagents ToolCallingAgent.
 
@@ -37,12 +50,12 @@ class EpsteinAgent:
     def __init__(self) -> None:
         model = LiteLLMModel(
             model_id=agent_settings.llm_model,
-            api_key=agent_settings.litellm_api_key,
+            api_key=agent_settings.openrouter_api_key,
         )
         self._agent = ToolCallingAgent(
             tools=ALL_TOOLS,
             model=model,
-            system_prompt=SYSTEM_PROMPT,
+            prompt_templates=_build_prompt_templates(),
         )
         logger.info(
             "EpsteinAgent initialised with model=%s, tools=%d",

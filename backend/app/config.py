@@ -10,8 +10,8 @@ class Settings(BaseSettings):
     database_url: str = (
         "postgresql+asyncpg://explorer:explorer@localhost:5432/epsteinexplorer"
     )
-    llm_model: str = "gpt-4o-mini"
-    litellm_api_key: str = ""
+    llm_model: str = "openrouter/google/gemini-2.0-flash-001"
+    openrouter_api_key: str = ""
     cors_origins: str = "http://localhost:5173,http://localhost:3000"
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
