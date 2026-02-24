@@ -12,6 +12,7 @@ class ChatRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=2000)
     conversation_id: str | None = None
     fingerprint: str | None = None
+    session_id: str | None = Field(default=None, max_length=128)
 
 
 class ChatEvent(BaseModel):

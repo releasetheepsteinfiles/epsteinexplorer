@@ -11,7 +11,7 @@ import yaml
 from smolagents import LiteLLMModel, ToolCallingAgent
 
 from agent.config import agent_settings
-from agent.tools import ALL_TOOLS
+from agent.tools import ALL_TOOLS, runtime_hooks_context
 
 logger = logging.getLogger(__name__)
 
@@ -47,11 +47,12 @@ class EpsteinAgent:
     Instantiate once and call ``run(prompt)`` for each user query.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, runtime_hooks=None) -> None:
         model = LiteLLMModel(
             model_id=agent_settings.llm_model,
             api_key=agent_settings.openrouter_api_key,
         )
+        self._runtime_hooks = runtime_hooks
         self._agent = ToolCallingAgent(
             tools=ALL_TOOLS,
             model=model,
@@ -65,4 +66,5 @@ class EpsteinAgent:
 
     def run(self, prompt: str) -> Any:
         """Run the agent on a user prompt and return the result."""
-        return self._agent.run(prompt)
+        with runtime_hooks_context(self._runtime_hooks):
+            return self._agent.run(prompt)
