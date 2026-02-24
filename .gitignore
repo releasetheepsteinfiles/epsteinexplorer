@@ -13,8 +13,8 @@ coverage.xml
 node_modules/
 frontend/dist/
 docs/node_modules/
-docs/.vitepress/cache/
-docs/.vitepress/dist/
+docs/.vitepress/
 docs/docs/
+docs/dist/
 
 pgdata/

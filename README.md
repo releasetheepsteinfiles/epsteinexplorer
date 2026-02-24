@@ -90,12 +90,12 @@ npm run dev
 
 ## Documentation
 
-Run the VitePress docs site:
+Run the Vite docs web app:
 
 ```bash
 cd docs
 npm install
-npm run docs:dev
+npm run dev
 ```
 
 ## Environment Variables
