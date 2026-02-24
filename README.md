@@ -94,6 +94,7 @@ Run the Vite docs web app:
 
 ```bash
 cd docs
+nvm use || true
 npm install
 npm run dev
 ```
