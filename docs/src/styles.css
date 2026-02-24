@@ -1,0 +1,227 @@
+/* Credits: Erwin Lejeune — 2026-02-24 */
+:root {
+  color-scheme: dark;
+  font-family: "JetBrains Mono", "IBM Plex Mono", "Fira Code", ui-monospace,
+    SFMono-Regular, Menlo, monospace;
+  line-height: 1.5;
+  font-weight: 400;
+
+  /* Synced with app palette */
+  --color-ink: #0a0e17;
+  --color-deep: #111827;
+  --color-panel: #1a2332;
+  --color-border: #2d3a4f;
+  --color-muted: #4b5f7a;
+  --color-subtle: #94a3b8;
+  --color-text: #e2e8f0;
+  --color-white: #f1f5f9;
+  --color-cyan: #94a3b8;
+  --color-cyan-dim: #64748b;
+  --color-violet: #94a3b8;
+  --color-rose: #94a3b8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--color-text);
+  background: var(--color-ink);
+}
+
+code {
+  font-family: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--color-cyan);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100vh;
+  overflow-y: auto;
+  border-right: 1px solid var(--color-border);
+  background: var(--color-deep);
+  padding: 1.25rem 1rem;
+}
+
+.content {
+  max-width: 980px;
+  padding: 1.25rem 2rem 3rem;
+}
+
+.kicker {
+  margin: 0 0 0.2rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-subtle);
+  font-size: 0.7rem;
+}
+
+.brand h1 {
+  margin: 0;
+  font-size: 1.2rem;
+  line-height: 1.2;
+  color: var(--color-white);
+}
+
+.toc {
+  list-style: none;
+  margin: 1.25rem 0 0;
+  padding: 0;
+}
+
+.toc li + li {
+  margin-top: 0.35rem;
+}
+
+.toc a {
+  display: block;
+  text-decoration: none;
+  color: var(--color-subtle);
+  border-radius: 8px;
+  padding: 0.4rem 0.55rem;
+  font-size: 0.92rem;
+}
+
+.toc a:hover {
+  background: rgba(45, 58, 79, 0.5);
+  color: var(--color-white);
+}
+
+.hero {
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--color-subtle);
+  font-size: 0.85rem;
+}
+
+.hero h2 {
+  margin: 0.15rem 0 0.4rem;
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
+  color: var(--color-white);
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--color-subtle);
+}
+
+.doc-section {
+  margin-top: 1.3rem;
+  background: var(--color-panel);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 1rem 1rem 0.85rem;
+}
+
+.doc-section h3 {
+  margin-top: 0;
+  margin-bottom: 0.65rem;
+  font-size: 1.1rem;
+  color: var(--color-white);
+}
+
+h4 {
+  margin: 0.75rem 0 0.35rem;
+  color: var(--color-subtle);
+}
+
+ul,
+ol {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+li + li {
+  margin-top: 0.35rem;
+}
+
+.hint {
+  margin-top: 0.85rem;
+  color: var(--color-subtle);
+}
+
+pre {
+  overflow-x: auto;
+  margin: 0.75rem 0 0;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 0.8rem;
+  background: var(--color-deep);
+  color: var(--color-text);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+}
+
+th,
+td {
+  border: 1px solid var(--color-border);
+  text-align: left;
+  padding: 0.55rem 0.65rem;
+  vertical-align: top;
+}
+
+th {
+  color: var(--color-cyan);
+  background: rgba(17, 24, 39, 0.95);
+}
+
+td {
+  color: var(--color-text);
+}
+
+.endpoint + .endpoint {
+  margin-top: 0.9rem;
+  padding-top: 0.9rem;
+  border-top: 1px dashed var(--color-border);
+}
+
+.method {
+  display: inline-block;
+  min-width: 3.5rem;
+  color: var(--color-subtle);
+}
+
+a {
+  color: var(--color-subtle);
+}
+
+a:hover {
+  color: var(--color-white);
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: static;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .content {
+    padding: 1rem;
+  }
+}

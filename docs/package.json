@@ -4,12 +4,23 @@
   "version": "0.1.0",
   "type": "module",
   "credits": "Erwin Lejeune - 2026-02-24",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
-    "docs:dev": "vitepress dev .",
-    "docs:build": "vitepress build .",
-    "docs:preview": "vitepress preview ."
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
   },
   "devDependencies": {
-    "vitepress": "^1.6.4"
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "@vitejs/plugin-react": "^5.1.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.9"
   }
 }
