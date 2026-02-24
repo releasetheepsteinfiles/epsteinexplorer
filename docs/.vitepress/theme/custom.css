@@ -1,0 +1,22 @@
+/* Credits: Erwin Lejeune - 2026-02-24 */
+:root {
+  --vp-c-brand-1: #22d3ee;
+  --vp-c-brand-2: #06b6d4;
+  --vp-c-brand-3: #0891b2;
+  --vp-c-brand-soft: rgba(34, 211, 238, 0.15);
+}
+
+.dark {
+  --vp-c-bg: #0a1020;
+  --vp-c-bg-soft: #111932;
+  --vp-c-bg-alt: #0f1730;
+  --vp-c-text-1: #e2e8f0;
+  --vp-c-text-2: #94a3b8;
+}
+
+.VPHomeHero .name {
+  background: linear-gradient(120deg, #22d3ee, #60a5fa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}

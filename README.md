@@ -88,6 +88,16 @@ npm run dev
 # Opens on http://localhost:5173, proxies /api to backend
 ```
 
+## Documentation
+
+Run the VitePress docs site:
+
+```bash
+cd docs
+npm install
+npm run docs:dev
+```
+
 ## Environment Variables
 
 | Variable | Default | Description |
