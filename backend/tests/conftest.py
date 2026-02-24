@@ -6,6 +6,7 @@ from __future__ import annotations
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
+from app import models as _models  # noqa: F401
 from app.models.user import Base
 
 TEST_DB_URL = "sqlite+aiosqlite:///:memory:"

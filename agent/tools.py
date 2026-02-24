@@ -7,15 +7,139 @@ tool functions are called synchronously by the agent.
 
 from __future__ import annotations
 
+import contextvars
 import json
+import time
+from contextlib import contextmanager
+from dataclasses import dataclass
+from typing import Any, Protocol
 
 from smolagents import tool
 
 from epsteinexposed import EpsteinExposed
 
 
+class RuntimeHooks(Protocol):
+    def cache_get(
+        self, endpoint: str, params_payload: dict[str, Any]
+    ) -> str | None: ...
+    def cache_set(
+        self, endpoint: str, params_payload: dict[str, Any], response_payload: str
+    ) -> str: ...
+    def log_tool_call(self, event: dict[str, Any]) -> None: ...
+    def log_api_call(self, event: dict[str, Any]) -> None: ...
+
+
+@dataclass
+class _NoopHooks:
+    def cache_get(self, endpoint: str, params_payload: dict[str, Any]) -> str | None:
+        return None
+
+    def cache_set(
+        self, endpoint: str, params_payload: dict[str, Any], response_payload: str
+    ) -> str:
+        return ""
+
+    def log_tool_call(self, event: dict[str, Any]) -> None:
+        return None
+
+    def log_api_call(self, event: dict[str, Any]) -> None:
+        return None
+
+
+_RUNTIME_HOOKS: contextvars.ContextVar[RuntimeHooks] = contextvars.ContextVar(
+    "runtime_hooks", default=_NoopHooks()
+)
+
+
+@contextmanager
+def runtime_hooks_context(hooks: RuntimeHooks | None):
+    token = _RUNTIME_HOOKS.set(hooks or _NoopHooks())
+    try:
+        yield
+    finally:
+        _RUNTIME_HOOKS.reset(token)
+
+
 def _client() -> EpsteinExposed:
     return EpsteinExposed()
+
+
+def _recorded_call(
+    *,
+    tool_name: str,
+    endpoint: str,
+    params_payload: dict[str, Any],
+    call_and_transform,
+) -> str:
+    hooks = _RUNTIME_HOOKS.get()
+    started = time.perf_counter()
+    cache_hit = False
+
+    try:
+        cached = hooks.cache_get(endpoint, params_payload)
+        if cached:
+            cache_hit = True
+            payload = cached
+            hooks.log_api_call(
+                {
+                    "endpoint": endpoint,
+                    "params_payload": params_payload,
+                    "cache_hit": True,
+                    "cache_key": "",
+                    "response_preview": payload[:1000],
+                    "success": True,
+                    "duration_ms": (time.perf_counter() - started) * 1000,
+                }
+            )
+        else:
+            payload = call_and_transform()
+            cache_key = hooks.cache_set(endpoint, params_payload, payload)
+            hooks.log_api_call(
+                {
+                    "endpoint": endpoint,
+                    "params_payload": params_payload,
+                    "cache_hit": False,
+                    "cache_key": cache_key,
+                    "response_preview": payload[:1000],
+                    "success": True,
+                    "duration_ms": (time.perf_counter() - started) * 1000,
+                }
+            )
+
+        hooks.log_tool_call(
+            {
+                "tool_name": tool_name,
+                "input_payload": params_payload,
+                "output_preview": payload[:1000],
+                "cache_hit": cache_hit,
+                "success": True,
+                "duration_ms": (time.perf_counter() - started) * 1000,
+            }
+        )
+        return payload
+    except Exception as exc:
+        hooks.log_tool_call(
+            {
+                "tool_name": tool_name,
+                "input_payload": params_payload,
+                "cache_hit": cache_hit,
+                "success": False,
+                "error": str(exc),
+                "duration_ms": (time.perf_counter() - started) * 1000,
+            }
+        )
+        hooks.log_api_call(
+            {
+                "endpoint": endpoint,
+                "params_payload": params_payload,
+                "cache_hit": cache_hit,
+                "success": False,
+                "error": str(exc),
+                "duration_ms": (time.perf_counter() - started) * 1000,
+            }
+        )
+        raise
 
 
 @tool
@@ -30,6 +154,16 @@ def search_persons(name: str, category: str = "") -> str:
     Returns:
         JSON with matching persons including stats (flights, documents, etc.).
     """
+    params_payload = {"name": name, "category": category}
+    return _recorded_call(
+        tool_name="search_persons",
+        endpoint="search_persons",
+        params_payload=params_payload,
+        call_and_transform=lambda: _search_persons_uncached(name, category),
+    )
+
+
+def _search_persons_uncached(name: str, category: str) -> str:
     with _client() as client:
         result = client.search_persons(
             q=name or None, category=category or None, per_page=20
@@ -64,6 +198,16 @@ def get_person_detail(slug: str) -> str:
     Returns:
         JSON with full person detail.
     """
+    params_payload = {"slug": slug}
+    return _recorded_call(
+        tool_name="get_person_detail",
+        endpoint="get_person_detail",
+        params_payload=params_payload,
+        call_and_transform=lambda: _get_person_detail_uncached(slug),
+    )
+
+
+def _get_person_detail_uncached(slug: str) -> str:
     with _client() as client:
         p = client.get_person(slug)
     return json.dumps(
@@ -91,6 +235,16 @@ def search_documents(query: str, source: str = "") -> str:
     Returns:
         JSON with matching documents including title, date, source, summary.
     """
+    params_payload = {"query": query, "source": source}
+    return _recorded_call(
+        tool_name="search_documents",
+        endpoint="search_documents",
+        params_payload=params_payload,
+        call_and_transform=lambda: _search_documents_uncached(query, source),
+    )
+
+
+def _search_documents_uncached(query: str, source: str) -> str:
     with _client() as client:
         result = client.search_documents(
             q=query or None, source=source or None, per_page=20
@@ -129,6 +283,25 @@ def search_flights(
     Returns:
         JSON with flight records including date, route, and passengers.
     """
+    params_payload = {
+        "passenger": passenger,
+        "year": year,
+        "origin": origin,
+        "destination": destination,
+    }
+    return _recorded_call(
+        tool_name="search_flights",
+        endpoint="search_flights",
+        params_payload=params_payload,
+        call_and_transform=lambda: _search_flights_uncached(
+            passenger, year, origin, destination
+        ),
+    )
+
+
+def _search_flights_uncached(
+    passenger: str, year: str, origin: str, destination: str
+) -> str:
     year_int = int(year) if year else None
     with _client() as client:
         result = client.search_flights(
@@ -168,6 +341,16 @@ def cross_search(query: str, type: str = "") -> str:
     Returns:
         JSON with separate result arrays for documents and emails.
     """
+    params_payload = {"query": query, "type": type}
+    return _recorded_call(
+        tool_name="cross_search",
+        endpoint="cross_search",
+        params_payload=params_payload,
+        call_and_transform=lambda: _cross_search_uncached(query, type),
+    )
+
+
+def _cross_search_uncached(query: str, type: str) -> str:
     with _client() as client:
         result = client.search(q=query, type=type or None, limit=20)
     return json.dumps(

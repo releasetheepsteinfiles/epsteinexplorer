@@ -10,9 +10,11 @@ COPY backend/app/ app/
 COPY agent/ agent/
 COPY backend/alembic.ini .
 COPY backend/alembic/ alembic/
+COPY backend/entrypoint.sh /entrypoint.sh
 
 RUN uv pip install --system .
+RUN chmod +x /entrypoint.sh
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+CMD ["/entrypoint.sh"]
