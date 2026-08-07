@@ -129,11 +129,15 @@ export default function ChatWindow() {
             ))}
             {loading && (
               <div className="flex justify-start">
-                <div className="rounded-2xl border border-border bg-deep px-4 py-3 text-sm text-muted">
-                  <span className="inline-flex gap-1">
-                    <span className="animate-pulse">●</span>
-                    <span className="animate-pulse" style={{ animationDelay: "0.15s" }}>●</span>
-                    <span className="animate-pulse" style={{ animationDelay: "0.3s" }}>●</span>
+                <div className="rounded-md rounded-bl-sm border border-line border-l-2 border-l-ember-dim bg-deep px-4 py-3 text-sm text-muted">
+                  <span
+                    className="inline-flex gap-1"
+                    role="status"
+                    aria-label="Searching the case files"
+                  >
+                    <span className="dot-pulse">●</span>
+                    <span className="dot-pulse" style={{ animationDelay: "0.15s" }}>●</span>
+                    <span className="dot-pulse" style={{ animationDelay: "0.3s" }}>●</span>
                   </span>
                 </div>
               </div>
@@ -144,7 +148,7 @@ export default function ChatWindow() {
       </div>
 
       {/* Input bar */}
-      <div className="border-t border-border/50 bg-deep/60 px-4 py-3 backdrop-blur-sm">
+      <div className="border-t border-line bg-deep/70 px-4 py-3 backdrop-blur-sm">
         <form
           className="mx-auto flex max-w-3xl gap-2"
           onSubmit={(e) => {
@@ -158,19 +162,24 @@ export default function ChatWindow() {
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask about the Epstein files..."
             disabled={loading}
-            className="flex-1 rounded-xl border border-border bg-panel px-4 py-2.5 text-sm text-text placeholder-muted outline-none transition focus:border-cyan/50 disabled:opacity-50"
+            className="flex-1 rounded-md border border-line bg-panel px-4 py-2.5 text-sm text-text placeholder-muted outline-none transition-colors duration-150 focus:border-ember disabled:opacity-50"
           />
           <button
             type="submit"
             disabled={loading || !input.trim()}
-            className="rounded-xl bg-cyan px-5 py-2.5 text-sm font-medium text-ink transition hover:bg-cyan/80 disabled:opacity-40"
+            className="rounded-md bg-ember px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-[0.1em] text-ink transition-colors duration-150 hover:bg-ember-dim hover:text-bright disabled:opacity-40"
           >
             Send
           </button>
         </form>
-        <p className="mx-auto mt-2 max-w-3xl text-center text-[11px] text-muted">
+        <p className="mx-auto mt-2 max-w-3xl text-center text-[11px] text-subtle">
           Data sourced from publicly released government records via{" "}
-          <a href="https://epsteinexposed.com" className="text-subtle hover:text-cyan" target="_blank" rel="noopener noreferrer">
+          <a
+            href="https://epsteinexposed.com"
+            className="text-subtle underline decoration-line underline-offset-2 transition-colors hover:text-ember hover:decoration-ember"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             epsteinexposed.com
           </a>
           . Inclusion does not imply guilt.

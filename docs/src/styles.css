@@ -1,24 +1,22 @@
 /* Credits: Erwin Lejeune — 2026-02-24 */
+@import "./brand.css";
+
+/* ── EpsteinExplorer Docs — "Declassified" ────────────────────
+   brand.css is a verbatim copy of brand/tokens.css. Read
+   brand/DESIGN.md before introducing a colour — this system
+   has exactly one accent on purpose.
+
+   Previously this surface deliberately greyed out its accents
+   (--color-cyan resolved to #94a3b8), which is why the docs
+   read as a different product from the app. It now shares the
+   single ember accent with every other surface.
+   ────────────────────────────────────────────────────────── */
+
 :root {
   color-scheme: dark;
-  font-family: "JetBrains Mono", "IBM Plex Mono", "Fira Code", ui-monospace,
-    SFMono-Regular, Menlo, monospace;
-  line-height: 1.5;
+  font-family: var(--font-sans);
+  line-height: 1.65;
   font-weight: 400;
-
-  /* Synced with app palette */
-  --color-ink: #0a0e17;
-  --color-deep: #111827;
-  --color-panel: #1a2332;
-  --color-border: #2d3a4f;
-  --color-muted: #4b5f7a;
-  --color-subtle: #94a3b8;
-  --color-text: #e2e8f0;
-  --color-white: #f1f5f9;
-  --color-cyan: #94a3b8;
-  --color-cyan-dim: #64748b;
-  --color-violet: #94a3b8;
-  --color-rose: #94a3b8;
 }
 
 * {
@@ -30,13 +28,34 @@ body {
   min-height: 100vh;
   color: var(--color-text);
   background: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+:focus-visible {
+  outline: 2px solid var(--color-ember);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--wash-ember-strong);
+  color: var(--color-bright);
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--color-ink); }
+::-webkit-scrollbar-thumb {
+  background: var(--color-line);
+  border-radius: var(--radius-sm);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--color-muted); }
 
 code {
-  font-family: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, Menlo, monospace;
-  color: var(--color-cyan);
+  font-family: var(--font-mono);
+  color: var(--color-ember);
 }
 
+/* ── Shell ───────────────────────────────────────────────────── */
 .layout {
   display: grid;
   grid-template-columns: 260px minmax(0, 1fr);
@@ -49,7 +68,7 @@ code {
   align-self: start;
   height: 100vh;
   overflow-y: auto;
-  border-right: 1px solid var(--color-border);
+  border-right: 1px solid var(--color-line);
   background: var(--color-deep);
   padding: 1.25rem 1rem;
 }
@@ -59,21 +78,27 @@ code {
   padding: 1.25rem 2rem 3rem;
 }
 
+/* ── Brand block ─────────────────────────────────────────────── */
 .kicker {
-  margin: 0 0 0.2rem;
-  letter-spacing: 0.08em;
+  margin: 0 0 0.25rem;
+  font-family: var(--font-mono);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--color-subtle);
-  font-size: 0.7rem;
+  color: var(--color-muted);
+  font-size: 0.6875rem;
 }
 
 .brand h1 {
   margin: 0;
-  font-size: 1.2rem;
+  font-family: var(--font-mono);
+  font-size: 1.15rem;
+  font-weight: 700;
   line-height: 1.2;
-  color: var(--color-white);
+  letter-spacing: -0.01em;
+  color: var(--color-bright);
 }
 
+/* ── Table of contents ───────────────────────────────────────── */
 .toc {
   list-style: none;
   margin: 1.25rem 0 0;
@@ -81,63 +106,84 @@ code {
 }
 
 .toc li + li {
-  margin-top: 0.35rem;
+  margin-top: 0.25rem;
 }
 
 .toc a {
   display: block;
   text-decoration: none;
+  font-family: var(--font-mono);
   color: var(--color-subtle);
-  border-radius: 8px;
-  padding: 0.4rem 0.55rem;
-  font-size: 0.92rem;
+  border-left: 2px solid transparent;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 0.35rem 0.55rem;
+  font-size: 0.8125rem;
+  transition: color var(--dur-fast) var(--ease-doc),
+    border-color var(--dur-fast) var(--ease-doc),
+    background var(--dur-fast) var(--ease-doc);
 }
 
 .toc a:hover {
-  background: rgba(45, 58, 79, 0.5);
-  color: var(--color-white);
+  background: var(--wash-ember);
+  border-left-color: var(--color-ember);
+  color: var(--color-ember);
 }
 
+/* ── Hero ────────────────────────────────────────────────────── */
 .hero {
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-line);
   padding-bottom: 1rem;
-  margin-bottom: 1.2rem;
+  margin-bottom: 1.35rem;
 }
 
 .eyebrow {
   margin: 0;
-  color: var(--color-subtle);
-  font-size: 0.85rem;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-muted);
+  font-size: 0.6875rem;
 }
 
 .hero h2 {
-  margin: 0.15rem 0 0.4rem;
+  margin: 0.35rem 0 0.4rem;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  letter-spacing: -0.02em;
   font-size: clamp(1.6rem, 3vw, 2.1rem);
-  color: var(--color-white);
+  color: var(--color-bright);
 }
 
 .subtitle {
   margin: 0;
   color: var(--color-subtle);
+  font-size: 0.9375rem;
 }
 
+/* ── Sections ────────────────────────────────────────────────── */
 .doc-section {
-  margin-top: 1.3rem;
+  margin-top: 1.35rem;
   background: var(--color-panel);
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
   padding: 1rem 1rem 0.85rem;
 }
 
 .doc-section h3 {
   margin-top: 0;
   margin-bottom: 0.65rem;
-  font-size: 1.1rem;
-  color: var(--color-white);
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--color-bright);
 }
 
 h4 {
   margin: 0.75rem 0 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
   color: var(--color-subtle);
 }
 
@@ -148,67 +194,96 @@ ol {
 }
 
 li + li {
-  margin-top: 0.35rem;
+  margin-top: 0.3rem;
+}
+
+li::marker {
+  color: var(--color-muted);
 }
 
 .hint {
   margin-top: 0.85rem;
   color: var(--color-subtle);
+  font-size: 0.875rem;
 }
 
 pre {
   overflow-x: auto;
   margin: 0.75rem 0 0;
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
   padding: 0.8rem;
   background: var(--color-deep);
   color: var(--color-text);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.65;
 }
 
+pre code {
+  color: var(--color-text);
+}
+
+/* ── Tables ──────────────────────────────────────────────────── */
 table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 0.5rem;
+  font-size: 0.875rem;
 }
 
 th,
 td {
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-line);
   text-align: left;
   padding: 0.55rem 0.65rem;
   vertical-align: top;
 }
 
 th {
-  color: var(--color-cyan);
-  background: rgba(17, 24, 39, 0.95);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-subtle);
+  background: var(--color-deep);
 }
 
 td {
   color: var(--color-text);
 }
 
+/* ── Endpoints ───────────────────────────────────────────────── */
 .endpoint + .endpoint {
   margin-top: 0.9rem;
   padding-top: 0.9rem;
-  border-top: 1px dashed var(--color-border);
+  border-top: 1px solid var(--color-line);
 }
 
 .method {
   display: inline-block;
   min-width: 3.5rem;
-  color: var(--color-subtle);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-ember);
 }
 
+/* ── Links ───────────────────────────────────────────────────── */
 a {
-  color: var(--color-subtle);
+  color: var(--color-ember);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--dur-fast) var(--ease-doc);
 }
 
 a:hover {
-  color: var(--color-white);
+  border-bottom-color: var(--color-ember);
 }
 
+/* ── Responsive ──────────────────────────────────────────────── */
 @media (max-width: 900px) {
   .layout {
     grid-template-columns: 1fr;
@@ -218,7 +293,7 @@ a:hover {
     position: static;
     height: auto;
     border-right: none;
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-line);
   }
 
   .content {

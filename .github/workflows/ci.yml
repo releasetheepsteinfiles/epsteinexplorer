@@ -64,3 +64,18 @@ jobs:
       - name: Install & build
         working-directory: frontend
         run: npm ci && npm run build
+
+  brand:
+    name: Design tokens in sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      # Guards the shared "Declassified" palette: frontend/src/brand.css and
+      # docs/src/brand.css must match brand/tokens.css exactly. Drift across
+      # the four repos is what this design system exists to prevent — see
+      # brand/DESIGN.md.
+      - name: Verify design tokens
+        run: node brand/verify-tokens.mjs

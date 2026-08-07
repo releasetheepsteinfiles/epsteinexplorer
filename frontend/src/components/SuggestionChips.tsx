@@ -15,13 +15,18 @@ interface Props {
 
 export default function SuggestionChips({ onSelect }: Props) {
   return (
-    <div className="flex flex-col items-center gap-6 px-4">
+    <div className="flex flex-col items-center gap-7 px-4">
       <div className="text-center">
-        <h2 className="mb-2 text-2xl font-bold tracking-tight text-white">
+        <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
+          Natural language research interface
+        </p>
+        <h2 className="mb-3 font-mono text-2xl font-bold tracking-tight text-bright">
           Explore the Epstein Files
         </h2>
-        <p className="text-sm text-subtle">
-          Ask anything about persons, documents, flights, and emails from the case files.
+        <div className="mx-auto mb-3 h-px w-16 bg-ember-dim" />
+        <p className="max-w-md text-sm text-subtle">
+          Ask anything about persons, documents, flights, and emails from the
+          case files.
         </p>
       </div>
       <div className="flex max-w-2xl flex-wrap justify-center gap-2">
@@ -29,7 +34,7 @@ export default function SuggestionChips({ onSelect }: Props) {
           <button
             key={s}
             onClick={() => onSelect(s)}
-            className="rounded-full border border-border bg-panel px-4 py-2 text-sm text-subtle transition hover:border-cyan/40 hover:text-cyan"
+            className="rounded-md border border-line bg-panel px-3.5 py-2 text-left text-sm text-subtle transition-colors duration-150 hover:border-ember-dim hover:text-ember"
           >
             {s}
           </button>
