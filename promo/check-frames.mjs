@@ -19,6 +19,17 @@ const MARKS = [1600, 2400, 4800, 8200, 11800, 13600, 15900, 18600];
 
 const tool = process.argv[2] || "explorer";
 const fmt = process.argv[3] || "wide";
+
+// Guard the easy mistake of passing the output *label* ("16x9") rather than
+// the format key ("wide"), which otherwise dies with an opaque
+// "SIZES[fmt] is not iterable".
+if (!SIZES[fmt]) {
+  console.error(
+    `unknown format "${fmt}" — expected one of: ${Object.keys(SIZES).join(", ")}`,
+  );
+  process.exit(1);
+}
+
 const [w, h] = SIZES[fmt];
 
 const { chromium } = await import("playwright");

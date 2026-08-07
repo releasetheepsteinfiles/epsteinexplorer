@@ -36,9 +36,6 @@ const FORMATS = {
   square: { w: 1080, h: 1080, label: "1x1" },
 };
 
-/** Poster frame (ms) — picked inside the demo scene, fully settled. */
-const POSTER_AT = 13200;
-
 /**
  * Preinstalled Chromium, when the image ships a build that does not match
  * the pinned Playwright revision. Override with PROMO_CHROMIUM; leave unset
@@ -73,6 +70,14 @@ function encoder(ffmpeg, outFile, fps) {
   const proc = spawn(ffmpeg, args, { stdio: ["pipe", "ignore", "pipe"] });
   let stderr = "";
   proc.stderr.on("data", (d) => (stderr += d.toString()));
+
+  // If ffmpeg dies mid-stream the next write raises EPIPE on stdin. Without
+  // a handler that becomes an unhandled 'error' event, which crashes the
+  // renderer with a bare EPIPE and throws away the ffmpeg stderr that
+  // actually explains the failure. Swallow it here and let the 'close'
+  // handler below report the real cause.
+  proc.stdin.on("error", () => {});
+
   const done = new Promise((res, rej) => {
     proc.on("close", (code) =>
       code === 0 ? res() : rej(new Error(`ffmpeg exited ${code}\n${stderr.slice(-2000)}`)),
@@ -82,9 +87,25 @@ function encoder(ffmpeg, outFile, fps) {
   return { proc, done };
 }
 
-/** Backpressure-aware write. */
+/**
+ * Backpressure-aware write. Also resolves on close/error: if ffmpeg dies
+ * while the pipe is full, 'drain' never fires and a plain once('drain')
+ * would hang the render forever instead of surfacing the failure.
+ */
 function write(stream, buf) {
-  return stream.write(buf) ? Promise.resolve() : new Promise((r) => stream.once("drain", r));
+  if (stream.destroyed) return Promise.resolve();
+  if (stream.write(buf)) return Promise.resolve();
+  return new Promise((resolve) => {
+    const done = () => {
+      stream.off("drain", done);
+      stream.off("close", done);
+      stream.off("error", done);
+      resolve();
+    };
+    stream.once("drain", done);
+    stream.once("close", done);
+    stream.once("error", done);
+  });
 }
 
 async function renderClip(browser, ffmpeg, tool, fmtKey) {
@@ -131,9 +152,11 @@ async function renderClip(browser, ffmpeg, tool, fmtKey) {
   proc.stdin.end();
   await done;
 
-  // Poster still, for README embeds and link previews.
+  // Poster still, for README embeds and link previews. The moment is
+  // derived per-clip by the scene, not hardcoded — see window.posterTime.
   if (fmtKey === "wide") {
-    await page.evaluate((ms) => window.renderAt(ms), POSTER_AT);
+    const posterAt = await page.evaluate(() => window.posterTime());
+    await page.evaluate((ms) => window.renderAt(ms), posterAt);
     const poster = await stage.screenshot({ type: "png", animations: "disabled" });
     writeFileSync(join(OUT, `${tool}-poster.png`), poster);
   }

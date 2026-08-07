@@ -164,13 +164,27 @@
 
       .resRow {
         display: flex;
-        align-items: baseline;
-        gap: .6em;
+        align-items: center;
+        gap: .7em;
         font-family: var(--mono);
         border-top: 1px solid var(--line);
         color: var(--text);
+        /* Result strings are hand-padded to align their columns; without
+           this the runs of spaces collapse and the arrows go ragged. */
+        white-space: pre;
       }
-      .resRow .tick { color: var(--ember); }
+
+      /* Drawn, not typed: U+25B8 is outside the unicode-range of every
+         vendored woff2, so a glyph here would come from a system fallback
+         and break the renderer's determinism guarantee. */
+      .resRow .tick {
+        flex: 0 0 auto;
+        width: 0;
+        height: 0;
+        border-left: .42em solid var(--ember);
+        border-top: .28em solid transparent;
+        border-bottom: .28em solid transparent;
+      }
 
       .illus {
         font-family: var(--mono);
@@ -321,9 +335,9 @@
             [["    docs    = client.", "c-txt"], ["search_documents", "c-key"], ["(q=", "c-txt"], ["\"little st james\"", "c-str"], [")", "c-txt"]],
           ],
           results: [
-            "flights.data → 142 records",
-            "docs.data    →  38 documents",
-            "elapsed      →  0.41s",
+            "flights.data -> 142 records",
+            "docs.data    ->  38 documents",
+            "elapsed      ->  0.41s",
           ],
           install: "pip install epsteinexposed",
           url: "github.com/guilyx/epsteinexposed",
@@ -366,15 +380,15 @@
           panelTitle: "semantic_search",
           panelTag: "planned",
           code: [
-            [["→ ", "c-key"], ["semantic_search", "c-brt"], ["(", "c-dim"]],
+            [["-> ", "c-key"], ["semantic_search", "c-brt"], ["(", "c-dim"]],
             [["    query=", "c-txt"], ["\"hiring practices at the estate\"", "c-str"], [",", "c-dim"]],
             [["    top_k=", "c-txt"], ["5", "c-str"]],
             [[")", "c-dim"]],
           ],
           results: [
-            "passage  → deposition, p.114  [cited]",
-            "passage  → court filing, p.7   [cited]",
-            "passage  → exhibit log, p.22   [cited]",
+            "passage  -> deposition, p.114  [cited]",
+            "passage  -> court filing, p.7   [cited]",
+            "passage  -> exhibit log, p.22   [cited]",
           ],
           install: "status: in development",
           url: "github.com/guilyx/epstein-files-rag-mcp",
@@ -533,7 +547,7 @@
 
         const res = document.getElementById("cRes");
         res.innerHTML = cfg.results
-          .map((r, i) => `<div class="resRow" id="rr${i}" style="font-size:${px(S.res)};padding:${px(11 * S.k)} ${px(22 * S.k)}"><span class="tick">▸</span><span id="rt${i}"></span></div>`)
+          .map((r, i) => `<div class="resRow" id="rr${i}" style="font-size:${px(S.res)};padding:${px(11 * S.k)} ${px(22 * S.k)}"><span class="tick"></span><span id="rt${i}"></span></div>`)
           .join("");
         cfg.results.forEach((r, i) => { document.getElementById("rt" + i).textContent = r; });
 
@@ -667,7 +681,7 @@
           }
 
           // results stagger in
-          const rs = cfg.chat ? c0 + 6500 : cfg.suite ? c0 + 2500 : c0 + 4700;
+          const rs = resultStart(c0);
           cfg.results.forEach((_, i) => {
             const row = document.getElementById("rr" + i);
             const p = easeOut(inv(t, rs + i * 330, rs + i * 330 + 480));
@@ -704,6 +718,30 @@
       function escapeHtml(s) {
         return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
       }
+
+      /**
+       * When the result rows begin staggering in. The chat variant waits
+       * on its bot message finishing (c0+6100); the others only wait on
+       * their own panel content.
+       */
+      function resultStart(c0) {
+        return cfg.chat ? c0 + 6300 : cfg.suite ? c0 + 2500 : c0 + 4700;
+      }
+
+      /**
+       * A moment where scene C is fully settled — every result row faded
+       * in and the caption up — but before the scene starts fading out.
+       * Derived rather than hardcoded: a hardcoded 13200 sat *before* the
+       * chat variant's rows had landed, so the Explorer poster (a README
+       * hero image) shipped with two invisible rows.
+       */
+      window.posterTime = function () {
+        const c0 = T.C[0];
+        const rs = resultStart(c0);
+        const rowsSettled = rs + (cfg.results.length - 1) * 330 + 480;
+        const captionSettled = rs + 1500;
+        return Math.min(Math.max(rowsSettled, captionSettled) + 120, T.C[1] - 150);
+      };
 
       window.buildScene = build;
       window.SCENE_DURATION = DURATION;
