@@ -11,6 +11,8 @@
 
 A full-stack chatbot that lets you explore persons, documents, flight logs, and emails from the Epstein files using natural language — powered by [epsteinexposed](https://github.com/guilyx/epsteinexposed) and [smolagents](https://github.com/huggingface/smolagents).
 
+[![EpsteinExplorer](https://raw.githubusercontent.com/guilyx/epsteinexplorer/main/promo/out/explorer-poster.png)](https://raw.githubusercontent.com/guilyx/epsteinexplorer/main/promo/out/explorer-16x9.mp4)
+
 > **Disclaimer:** Inclusion in the Epstein Exposed database does not imply guilt or wrongdoing. All data is derived from publicly released government records, court filings, and verified reporting.
 
 ## Architecture
@@ -120,11 +122,52 @@ The smolagents `ToolCallingAgent` has access to these tools via `epsteinexposed`
 | `search_flights` | Flight log search |
 | `cross_search` | Search across documents and emails |
 
-## Related Projects
+## The toolchain
 
-- [epsteinexposed](https://github.com/guilyx/epsteinexposed) — Python client for the Epstein Exposed API
-- [epsteinexposed-mcp](https://github.com/guilyx/epsteinexposed-mcp) — MCP server wrapping the same API
-- [LinkedStein](https://github.com/guilyx/LinkedStein) — LinkedIn x Epstein files cross-reference tool
+This repository is one of four that share a data source and a design system:
+
+| Repo | Role |
+|---|---|
+| [`epsteinexposed`](https://github.com/guilyx/epsteinexposed) | Python client for the public API |
+| [`epsteinexposed-mcp`](https://github.com/guilyx/epsteinexposed-mcp) | MCP server — structured search |
+| [`epstein-files-rag-mcp`](https://github.com/guilyx/epstein-files-rag-mcp) | MCP server — semantic search *(in development)* |
+| [`epsteinexplorer`](https://github.com/guilyx/epsteinexplorer) | Natural-language chat app *(this repo)* |
+
+Also related: [LinkedStein](https://github.com/guilyx/LinkedStein) — LinkedIn × Epstein files cross-reference tool.
+
+## Design system
+
+All four repositories share the **"Declassified"** visual language — a dark
+archival palette with a single ember accent, monospace structure and Inter
+prose. The canonical tokens live in [`brand/tokens.css`](brand/tokens.css)
+and the rationale in [`brand/DESIGN.md`](brand/DESIGN.md); both files are
+byte-identical across the four repos.
+
+The app and its docs mirror those tokens into Tailwind via
+`frontend/src/brand.css` and `docs/src/brand.css`. Verify they have not
+drifted:
+
+```bash
+node brand/verify-tokens.mjs
+```
+
+## Promo assets
+
+Silent, captioned promo videos for all four tools are rendered from
+[`promo/`](promo/) — animated HTML captured frame-by-frame through Chromium
+and encoded with ffmpeg, so output is deterministic.
+
+```bash
+cd promo && npm install && npm run render
+```
+
+Output lands in `promo/out/` as 16:9 and 1:1 MP4s plus poster stills. See
+[`LAUNCH.md`](LAUNCH.md) for how they map to each channel.
+
+## Launch
+
+[`LAUNCH.md`](LAUNCH.md) holds the go-to-market plan for the toolchain —
+positioning, channel-by-channel copy, sequencing and risks.
 
 ## License
 

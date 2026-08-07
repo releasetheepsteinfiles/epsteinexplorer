@@ -1,0 +1,4 @@
+# Render deps and scratch frames — the finished MP4s and posters in
+# out/ ARE committed, since they are the launch deliverable.
+node_modules/
+out/check/

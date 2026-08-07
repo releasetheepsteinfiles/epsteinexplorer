@@ -1,0 +1,16 @@
+{
+  "name": "epsteinexplorer-promo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Deterministic promo video renderer for the Epstein Files toolchain",
+  "scripts": {
+    "render": "node render.mjs",
+    "render:wide": "node render.mjs '' wide",
+    "check": "node check-frames.mjs"
+  },
+  "devDependencies": {
+    "ffmpeg-static": "^5.2.0",
+    "playwright": "^1.49.0"
+  }
+}

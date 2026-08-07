@@ -1,0 +1,628 @@
+<!doctype html>
+<!-- Credits: Erwin Lejeune
+     Promo scene renderer for the Epstein Files toolchain.
+
+     Every visual is a pure function of time via window.renderAt(ms):
+     there are NO CSS animations and NO reliance on wall-clock, so
+     frame captures are byte-reproducible. render.mjs drives this.
+
+     Palette and type follow brand/DESIGN.md ("Declassified").
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>promo scene</title>
+    <link rel="stylesheet" href="./fonts/fonts.css" />
+    <style>
+      /* Canonical tokens — mirror of brand/tokens.css */
+      :root {
+        --ink: #0b1017;
+        --deep: #10171f;
+        --panel: #161f2b;
+        --line: #243040;
+        --muted: #5c6c82;
+        --subtle: #94a3b8;
+        --text: #e4e8ee;
+        --bright: #f5f7fa;
+        --ember: #e8913a;
+        --ember-dim: #8a5520;
+        --seal: #c0524a;
+        --verify: #5fa37e;
+        --mono: "JetBrains Mono", monospace;
+        --sans: "Inter", sans-serif;
+      }
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      html, body { background: var(--ink); overflow: hidden; }
+
+      #stage {
+        position: relative;
+        overflow: hidden;
+        background: var(--ink);
+        color: var(--text);
+        font-family: var(--sans);
+      }
+
+      /* ── Background: faint document grid + vignette ─────────── */
+      #grid {
+        position: absolute; inset: 0;
+        background-image:
+          linear-gradient(rgba(36,48,64,.30) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(36,48,64,.30) 1px, transparent 1px);
+        background-size: 64px 64px;
+      }
+      #vignette {
+        position: absolute; inset: 0;
+        background: radial-gradient(ellipse at 50% 42%, transparent 30%, rgba(11,16,23,.92) 100%);
+      }
+
+      .layer { position: absolute; inset: 0; will-change: opacity, transform; }
+
+      /* ── Persistent chrome ──────────────────────────────────── */
+      #chrome { position: absolute; inset: 0; pointer-events: none; }
+
+      #fileTag {
+        position: absolute;
+        font-family: var(--mono);
+        text-transform: uppercase;
+        color: var(--subtle);
+        letter-spacing: .16em;
+      }
+
+      #footRule { position: absolute; background: var(--line); }
+      #progress { position: absolute; background: var(--ember); }
+
+      #footText {
+        position: absolute;
+        font-family: var(--mono);
+        color: var(--subtle);
+        letter-spacing: .1em;
+        text-transform: uppercase;
+      }
+
+      /* ── Centred content column ─────────────────────────────── */
+      /* Vertically centred so every scene shares one optical centre,
+         whatever its content height or the crop. */
+      .col {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+
+      .kicker {
+        font-family: var(--mono);
+        color: var(--ember);
+        text-transform: uppercase;
+        letter-spacing: .18em;
+      }
+
+      .logo {
+        font-family: var(--mono);
+        font-weight: 700;
+        color: var(--bright);
+        letter-spacing: -.02em;
+        white-space: nowrap;
+      }
+      .logo .accent { color: var(--ember); }
+
+      .redactbar {
+        display: inline-block;
+        background: var(--ember);
+        border-radius: 2px;
+        vertical-align: middle;
+      }
+
+      .pitch {
+        font-family: var(--mono);
+        font-weight: 600;
+        color: var(--bright);
+        letter-spacing: -.015em;
+        line-height: 1.28;
+      }
+
+      .sub { color: var(--subtle); font-family: var(--sans); }
+
+      /* ── Demo panel ─────────────────────────────────────────── */
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        overflow: hidden;
+        text-align: left;
+        width: 100%;
+      }
+
+      .panelBar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--line);
+        background: var(--deep);
+        font-family: var(--mono);
+        color: var(--muted);
+        letter-spacing: .1em;
+        text-transform: uppercase;
+      }
+
+      .panelBody { font-family: var(--mono); white-space: pre-wrap; }
+
+      .ln { display: block; }
+      .c-key { color: var(--ember); }
+      .c-str { color: var(--verify); }
+      .c-dim { color: var(--muted); }
+      .c-txt { color: var(--text); }
+      .c-brt { color: var(--bright); }
+
+      .caret { display: inline-block; background: var(--ember); vertical-align: text-bottom; }
+
+      .resRow {
+        display: flex;
+        align-items: baseline;
+        gap: .6em;
+        font-family: var(--mono);
+        border-top: 1px solid var(--line);
+        color: var(--text);
+      }
+      .resRow .tick { color: var(--ember); }
+
+      .illus {
+        font-family: var(--mono);
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: .12em;
+        text-align: right;
+      }
+
+      /* ── Chat bubbles (explorer) ────────────────────────────── */
+      .bubbleUser {
+        align-self: flex-end;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 6px 6px 2px 6px;
+        color: var(--text);
+        font-family: var(--sans);
+      }
+      .bubbleBot {
+        align-self: flex-start;
+        background: var(--deep);
+        border: 1px solid var(--line);
+        border-left: 2px solid var(--ember-dim);
+        border-radius: 6px 6px 6px 2px;
+        color: var(--text);
+        font-family: var(--sans);
+      }
+
+      /* ── Install / end card ─────────────────────────────────── */
+      .cmd {
+        font-family: var(--mono);
+        background: var(--deep);
+        border: 1px solid var(--line);
+        border-left: 2px solid var(--ember);
+        border-radius: 6px;
+        color: var(--bright);
+        white-space: nowrap;
+      }
+      .cmd .prompt { color: var(--ember); }
+
+      .stampBox {
+        font-family: var(--mono);
+        text-transform: uppercase;
+        letter-spacing: .14em;
+        color: var(--ember);
+        border: 1px solid var(--ember-dim);
+        border-radius: 2px;
+        display: inline-block;
+      }
+
+      .url { font-family: var(--mono); color: var(--ember); letter-spacing: .02em; }
+      .disc { color: var(--subtle); font-family: var(--sans); line-height: 1.5; }
+      .hair { background: var(--line); }
+    </style>
+  </head>
+  <body>
+    <div id="stage">
+      <div id="grid"></div>
+      <div id="vignette"></div>
+
+      <div id="chrome">
+        <div id="fileTag"></div>
+        <div id="footRule"></div>
+        <div id="progress"></div>
+        <div id="footText"></div>
+      </div>
+
+      <div class="layer" id="sA"><div class="col" id="cA"></div></div>
+      <div class="layer" id="sB"><div class="col" id="cB"></div></div>
+      <div class="layer" id="sC"><div class="col" id="cC"></div></div>
+      <div class="layer" id="sD"><div class="col" id="cD"></div></div>
+      <div class="layer" id="sE"><div class="col" id="cE"></div></div>
+    </div>
+
+    <script>
+      // ── Content ────────────────────────────────────────────────
+      // Demo output is illustrative and is labelled as such on screen.
+      // No person is named in any promo asset: inclusion in these
+      // records is not an accusation. See brand/DESIGN.md § Ethics.
+      const TOOLS = {
+        exposed: {
+          file: "File 01",
+          nameA: "epstein", nameB: "exposed",
+          kicker: "Python client",
+          pitch: "The Epstein files,\nqueryable from Python.",
+          sub: "Persons, documents, flight logs and emails — sync and async.",
+          panelTitle: "search.py",
+          panelTag: "python",
+          code: [
+            [["from ", "c-dim"], ["epsteinexposed", "c-key"], [" import ", "c-dim"], ["EpsteinExposed", "c-brt"]],
+            [],
+            [["with ", "c-dim"], ["EpsteinExposed() ", "c-brt"], ["as ", "c-dim"], ["client:", "c-brt"]],
+            [["    flights = client.", "c-txt"], ["search_flights", "c-key"], ["(year=", "c-txt"], ["1997", "c-str"], [")", "c-txt"]],
+            [["    docs    = client.", "c-txt"], ["search_documents", "c-key"], ["(q=", "c-txt"], ["\"little st james\"", "c-str"], [")", "c-txt"]],
+          ],
+          results: [
+            "flights.data → 142 records",
+            "docs.data    →  38 documents",
+            "elapsed      →  0.41s",
+          ],
+          install: "pip install epsteinexposed",
+          url: "github.com/guilyx/epsteinexposed",
+          badge: null,
+        },
+
+        mcp: {
+          file: "File 02",
+          nameA: "epsteinexposed", nameB: "-mcp",
+          kicker: "MCP server · structured search",
+          pitch: "Give your agent\nthe case files.",
+          sub: "Five MCP tools over persons, documents, flights and emails.",
+          panelTitle: "mcp.json",
+          panelTag: "config",
+          code: [
+            [["{", "c-dim"]],
+            [["  \"mcpServers\"", "c-key"], [": {", "c-dim"]],
+            [["    \"epstein-files\"", "c-key"], [": {", "c-dim"]],
+            [["      \"command\"", "c-txt"], [": ", "c-dim"], ["\"epsteinexposed-mcp\"", "c-str"]],
+            [["    }", "c-dim"]],
+            [["  }", "c-dim"]],
+            [["}", "c-dim"]],
+          ],
+          results: [
+            "search_persons    · get_person",
+            "search_documents  · search_flights",
+            "cross_search",
+          ],
+          install: "pip install epsteinexposed-mcp",
+          url: "github.com/guilyx/epsteinexposed-mcp",
+          badge: null,
+        },
+
+        rag: {
+          file: "File 03",
+          nameA: "epstein-files-rag", nameB: "-mcp",
+          kicker: "MCP server · semantic search",
+          pitch: "Ask what the documents\nsay, not what they match.",
+          sub: "Retrieval over document text — every passage carries a citation.",
+          panelTitle: "semantic_search",
+          panelTag: "planned",
+          code: [
+            [["→ ", "c-key"], ["semantic_search", "c-brt"], ["(", "c-dim"]],
+            [["    query=", "c-txt"], ["\"hiring practices at the estate\"", "c-str"], [",", "c-dim"]],
+            [["    top_k=", "c-txt"], ["5", "c-str"]],
+            [[")", "c-dim"]],
+          ],
+          results: [
+            "passage  → deposition, p.114  [cited]",
+            "passage  → court filing, p.7   [cited]",
+            "passage  → exhibit log, p.22   [cited]",
+          ],
+          install: "status: in development",
+          url: "github.com/guilyx/epstein-files-rag-mcp",
+          badge: "In development",
+        },
+
+        explorer: {
+          file: "File 04",
+          nameA: "Epstein", nameB: "Explorer",
+          kicker: "Natural language research interface",
+          pitch: "Just ask.",
+          sub: "A chat interface over the released records, with sources attached.",
+          panelTitle: "epsteinexplorer",
+          panelTag: "chat",
+          chat: true,
+          userMsg: "What do the flight logs cover for 1997?",
+          botMsg: "The 1997 logs span 142 recorded legs, mostly between Teterboro, Palm Beach and the Virgin Islands. Each entry links back to the released document it came from.",
+          results: [
+            "142 flight records",
+            "38 linked documents",
+            "sources attached to every claim",
+          ],
+          install: "docker compose up",
+          url: "github.com/guilyx/epsteinexplorer",
+          badge: null,
+        },
+      };
+
+      // ── Timeline (ms) ──────────────────────────────────────────
+      const T = {
+        A: [0, 2700],
+        B: [3050, 6250],
+        C: [6600, 14400],
+        D: [14750, 17000],
+        E: [17350, 19600],
+      };
+      const DURATION = 19600;
+
+      // ── Math helpers ───────────────────────────────────────────
+      const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+      const inv = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
+      const easeOut = (x) => 1 - Math.pow(1 - x, 3);
+      const easeInOut = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+
+      let S = {}; // scale-dependent sizing
+      let cfg = null;
+
+      // ── Layout: sizes derive from stage height so 16:9 and 1:1
+      //    share one visual language at different crops. ─────────
+      function computeScale(w, h) {
+        const k = h / 1080;
+        return {
+          k,
+          pad: Math.round(64 * k),
+          fileTag: Math.round(15 * k),
+          logo: Math.round((w < h * 1.2 ? 60 : 74) * k),
+          kicker: Math.round(17 * k),
+          pitch: Math.round((w < h * 1.2 ? 46 : 58) * k),
+          sub: Math.round(21 * k),
+          panelW: Math.round(Math.min(w - 200 * k, 980 * k)),
+          panelTitle: Math.round(14 * k),
+          code: Math.round(20 * k),
+          res: Math.round(19 * k),
+          cmd: Math.round(26 * k),
+          url: Math.round(22 * k),
+          disc: Math.round(15 * k),
+        };
+      }
+
+      function px(n) { return n + "px"; }
+
+      // ── Build DOM once per tool ────────────────────────────────
+      function build(toolKey, w, h) {
+        cfg = TOOLS[toolKey];
+        S = computeScale(w, h);
+        const stage = document.getElementById("stage");
+        stage.style.width = px(w);
+        stage.style.height = px(h);
+
+        // chrome
+        const ft = document.getElementById("fileTag");
+        ft.style.left = px(S.pad); ft.style.top = px(S.pad);
+        ft.style.fontSize = px(S.fileTag);
+        ft.textContent = "";
+
+        const fr = document.getElementById("footRule");
+        fr.style.left = px(S.pad);
+        fr.style.right = px(S.pad);
+        fr.style.bottom = px(S.pad);
+        fr.style.height = "1px";
+
+        const pg = document.getElementById("progress");
+        pg.style.left = px(S.pad);
+        pg.style.bottom = px(S.pad);
+        pg.style.height = "2px";
+        pg.style.width = "0px";
+
+        const fx = document.getElementById("footText");
+        fx.style.left = px(S.pad);
+        fx.style.bottom = px(S.pad + 18 * S.k);
+        fx.style.fontSize = px(S.fileTag);
+        fx.textContent = "Public records · research tooling";
+
+        // Scene A — logotype
+        document.getElementById("cA").innerHTML = `
+          <div class="kicker" id="aKick" style="font-size:${px(S.kicker)};margin-bottom:${px(22 * S.k)}"></div>
+          <div class="logo" id="aLogo" style="font-size:${px(S.logo)}"></div>
+          <div class="hair" id="aRule" style="height:1px;width:0;margin-top:${px(26 * S.k)}"></div>
+        `;
+
+        // Scene B — pitch
+        document.getElementById("cB").innerHTML = `
+          <div class="pitch" id="bPitch" style="font-size:${px(S.pitch)};white-space:pre-line"></div>
+          <div class="sub" id="bSub" style="font-size:${px(S.sub)};margin-top:${px(24 * S.k)};max-width:${px(S.panelW * 0.8)}"></div>
+        `;
+
+        // Scene C — demo
+        const codeHtml = cfg.chat ? "" : cfg.code.map((_, i) => `<span class="ln" id="cl${i}"></span>`).join("");
+        const chatHtml = cfg.chat
+          ? `<div style="display:flex;flex-direction:column;gap:${px(14 * S.k)};padding:${px(22 * S.k)}">
+               <div class="bubbleUser" id="chU" style="font-size:${px(S.code)};padding:${px(13 * S.k)} ${px(17 * S.k)};max-width:78%"></div>
+               <div class="bubbleBot"  id="chB" style="font-size:${px(S.code)};padding:${px(13 * S.k)} ${px(17 * S.k)};max-width:88%;line-height:1.55"></div>
+             </div>`
+          : `<div class="panelBody" id="cCode" style="font-size:${px(S.code)};padding:${px(22 * S.k)};line-height:1.75">${codeHtml}</div>`;
+
+        document.getElementById("cC").innerHTML = `
+          <div class="panel" id="cPanel" style="width:${px(S.panelW)}">
+            <div class="panelBar" style="font-size:${px(S.panelTitle)};padding:${px(11 * S.k)} ${px(16 * S.k)}">
+              <span id="cTitle"></span><span id="cTag"></span>
+            </div>
+            ${chatHtml}
+            <div id="cRes"></div>
+          </div>
+          <div class="illus" id="cIllus" style="font-size:${px(S.panelTitle)};width:${px(S.panelW)};margin-top:${px(10 * S.k)}">Illustrative output</div>
+        `;
+        document.getElementById("cTitle").textContent = cfg.panelTitle;
+        document.getElementById("cTag").textContent = cfg.panelTag;
+
+        const res = document.getElementById("cRes");
+        res.innerHTML = cfg.results
+          .map((r, i) => `<div class="resRow" id="rr${i}" style="font-size:${px(S.res)};padding:${px(11 * S.k)} ${px(22 * S.k)}"><span class="tick">▸</span><span id="rt${i}"></span></div>`)
+          .join("");
+        cfg.results.forEach((r, i) => { document.getElementById("rt" + i).textContent = r; });
+
+
+        // Scene D — install
+        document.getElementById("cD").innerHTML = `
+          <div class="kicker" id="dKick" style="font-size:${px(S.kicker)};margin-bottom:${px(24 * S.k)}"></div>
+          <div class="cmd" id="dCmd" style="font-size:${px(S.cmd)};padding:${px(18 * S.k)} ${px(28 * S.k)}"></div>
+        `;
+
+        // Scene E — end card
+        document.getElementById("cE").innerHTML = `
+          <div class="logo" id="eLogo" style="font-size:${px(S.logo * 0.62)}"></div>
+          ${cfg.badge ? `<div class="stampBox" id="eBadge" style="font-size:${px(S.kicker)};padding:${px(5 * S.k)} ${px(10 * S.k)};margin-top:${px(18 * S.k)}">${cfg.badge}</div>` : ""}
+          <div class="hair" style="height:1px;width:${px(S.panelW * 0.42)};margin:${px(26 * S.k)} 0"></div>
+          <div class="url" id="eUrl" style="font-size:${px(S.url)}"></div>
+          <div class="disc" id="eDisc" style="font-size:${px(S.disc)};margin-top:${px(28 * S.k)};max-width:${px(S.panelW * 0.86)}"></div>
+        `;
+
+        document.getElementById("eUrl").textContent = cfg.url;
+        document.getElementById("eDisc").textContent =
+          "Sourced from publicly released government records via epsteinexposed.com. Inclusion does not imply guilt or wrongdoing.";
+      }
+
+      // ── Scene staging ──────────────────────────────────────────
+      function stageLayer(el, t, span, rise) {
+        const IN = 420, OUT = 380;
+        const [a, b] = span;
+        if (t < a - 60 || t > b + OUT + 60) { el.style.opacity = 0; el.style.visibility = "hidden"; return 0; }
+        el.style.visibility = "visible";
+        const fi = easeOut(inv(t, a, a + IN));
+        const fo = easeOut(inv(t, b, b + OUT));
+        const o = Math.min(fi, 1 - fo);
+        el.style.opacity = o.toFixed(4);
+        const y = (1 - fi) * rise - fo * rise * 0.7;
+        el.style.transform = `translateY(${y.toFixed(2)}px)`;
+        return o;
+      }
+
+      function typedLen(text, p) { return text.slice(0, Math.round(clamp(p, 0, 1) * text.length)); }
+
+      function caret(t, sizePx) {
+        const on = Math.floor(t / 450) % 2 === 0;
+        return `<span class="caret" style="width:${px(Math.round(sizePx * 0.55))};height:${px(Math.round(sizePx * 0.95))};opacity:${on ? 1 : 0}"></span>`;
+      }
+
+      // ── The renderer ───────────────────────────────────────────
+      window.renderAt = function (t) {
+        const rise = 16 * S.k;
+
+        // chrome: file tag types in, progress bar tracks the whole clip
+        const tagFull = cfg.file + " — " + cfg.kicker;
+        document.getElementById("fileTag").textContent =
+          typedLen(tagFull, inv(t, 260, 1500)).toUpperCase();
+
+        const fullW = document.getElementById("footRule").getBoundingClientRect().width;
+        document.getElementById("progress").style.width = px(Math.round(fullW * clamp(t / DURATION, 0, 1)));
+        document.getElementById("footText").style.opacity = (0.85 * easeOut(inv(t, 900, 1800))).toFixed(3);
+
+        // ── Scene A — logotype assembles behind a redaction bar ──
+        const oA = stageLayer(document.getElementById("sA"), t, T.A, rise);
+        if (oA > 0) {
+          document.getElementById("aKick").textContent = cfg.kicker.toUpperCase();
+          const p = easeInOut(inv(t, 380, 1750));
+          // The bar retracts to reveal the product's OWN name only.
+          const barW = (1 - p) * S.logo * 7.2;
+          const nameHtml = `${cfg.nameA}<span class="accent">${cfg.nameB}</span>`;
+          document.getElementById("aLogo").innerHTML =
+            barW > 2
+              ? `<span style="position:relative;display:inline-block">
+                   <span style="opacity:${p.toFixed(3)}">${nameHtml}</span>
+                   <span class="redactbar" style="position:absolute;right:0;top:8%;height:84%;width:${px(barW)}"></span>
+                 </span>`
+              : nameHtml;
+          document.getElementById("aRule").style.width = px(easeOut(inv(t, 1500, 2350)) * S.panelW * 0.34);
+        }
+
+        // ── Scene B — the pitch ──────────────────────────────────
+        const oB = stageLayer(document.getElementById("sB"), t, T.B, rise);
+        if (oB > 0) {
+          document.getElementById("bPitch").textContent = cfg.pitch;
+          document.getElementById("bSub").style.opacity = easeOut(inv(t, T.B[0] + 620, T.B[0] + 1350)).toFixed(3);
+          document.getElementById("bSub").textContent = cfg.sub;
+        }
+
+        // ── Scene C — the demo ───────────────────────────────────
+        const oC = stageLayer(document.getElementById("sC"), t, T.C, rise);
+        if (oC > 0) {
+          const c0 = T.C[0];
+          if (cfg.chat) {
+            const u = document.getElementById("chU");
+            const b = document.getElementById("chB");
+            const pu = inv(t, c0 + 420, c0 + 2600);
+            u.textContent = typedLen(cfg.userMsg, pu);
+            u.style.opacity = pu > 0 ? 1 : 0;
+            const pb = inv(t, c0 + 3100, c0 + 6100);
+            b.textContent = typedLen(cfg.botMsg, pb);
+            b.style.opacity = pb > 0 ? 1 : 0;
+          } else {
+            // type the code block character-by-character across lines
+            const flat = cfg.code.map((ln) => ln.map((s) => s[0]).join(""));
+            const total = flat.reduce((n, s) => n + s.length, 0) || 1;
+            const shown = Math.round(easeInOut(inv(t, c0 + 420, c0 + 4200)) * total);
+            let used = 0;
+            cfg.code.forEach((ln, i) => {
+              const el = document.getElementById("cl" + i);
+              const lineLen = flat[i].length;
+              const avail = clamp(shown - used, 0, lineLen);
+              let html = "", consumed = 0;
+              for (const [txt, cls] of ln) {
+                const take = clamp(avail - consumed, 0, txt.length);
+                if (take > 0) html += `<span class="${cls}">${escapeHtml(txt.slice(0, take))}</span>`;
+                consumed += txt.length;
+              }
+              const isCursorLine = shown - used > 0 && shown - used <= lineLen;
+              el.innerHTML = html + (isCursorLine && shown < total ? caret(t, S.code) : "") || "&nbsp;";
+              used += lineLen;
+            });
+          }
+
+          // results stagger in
+          const rs = cfg.chat ? c0 + 6500 : c0 + 4700;
+          cfg.results.forEach((_, i) => {
+            const row = document.getElementById("rr" + i);
+            const p = easeOut(inv(t, rs + i * 330, rs + i * 330 + 480));
+            row.style.opacity = p.toFixed(3);
+            row.style.transform = `translateX(${((1 - p) * 10 * S.k).toFixed(2)}px)`;
+          });
+          document.getElementById("cIllus").style.opacity =
+            (0.9 * easeOut(inv(t, rs + 900, rs + 1500))).toFixed(3);
+        }
+
+        // ── Scene D — install ────────────────────────────────────
+        const oD = stageLayer(document.getElementById("sD"), t, T.D, rise);
+        if (oD > 0) {
+          document.getElementById("dKick").textContent = cfg.badge ? "Roadmap" : "Install";
+          const cmdP = inv(t, T.D[0] + 300, T.D[0] + 1500);
+          const shown = typedLen(cfg.install, cmdP);
+          const showPrompt = !cfg.badge;
+          document.getElementById("dCmd").innerHTML =
+            (showPrompt ? `<span class="prompt">$ </span>` : "") +
+            escapeHtml(shown) +
+            (cmdP < 1 ? caret(t, S.cmd) : "");
+        }
+
+        // ── Scene E — end card ───────────────────────────────────
+        const oE = stageLayer(document.getElementById("sE"), t, T.E, rise);
+        if (oE > 0) {
+          document.getElementById("eLogo").innerHTML =
+            `${cfg.nameA}<span class="accent">${cfg.nameB}</span>`;
+          document.getElementById("eDisc").style.opacity =
+            easeOut(inv(t, T.E[0] + 700, T.E[0] + 1500)).toFixed(3);
+        }
+      };
+
+      function escapeHtml(s) {
+        return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      }
+
+      window.buildScene = build;
+      window.SCENE_DURATION = DURATION;
+    </script>
+  </body>
+</html>
