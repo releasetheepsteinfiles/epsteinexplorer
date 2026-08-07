@@ -133,6 +133,10 @@ This repository is one of four that share a data source and a design system:
 | [`epstein-files-rag-mcp`](https://github.com/guilyx/epstein-files-rag-mcp) | MCP server — semantic search *(in development)* |
 | [`epsteinexplorer`](https://github.com/guilyx/epsteinexplorer) | Natural-language chat app *(this repo)* |
 
+A 20-second overview of how the four fit together:
+
+[![Epstein Files toolchain](https://raw.githubusercontent.com/guilyx/epsteinexplorer/main/promo/out/suite-poster.png)](https://raw.githubusercontent.com/guilyx/epsteinexplorer/main/promo/out/suite-16x9.mp4)
+
 Also related: [LinkedStein](https://github.com/guilyx/LinkedStein) — LinkedIn × Epstein files cross-reference tool.
 
 ## Design system
@@ -153,16 +157,21 @@ node brand/verify-tokens.mjs
 
 ## Promo assets
 
-Silent, captioned promo videos for all four tools are rendered from
-[`promo/`](promo/) — animated HTML captured frame-by-frame through Chromium
-and encoded with ffmpeg, so output is deterministic.
+Silent, captioned promo videos are rendered from [`promo/`](promo/) —
+animated HTML captured frame-by-frame through Chromium and encoded with
+ffmpeg, so output is deterministic.
+
+**Five clips:** one per tool, plus a **toolchain overview** (`suite-*`) that
+presents all four together — the one to reach for when someone is meeting
+the project for the first time.
 
 ```bash
 cd promo && npm install && npm run render
 ```
 
 Output lands in `promo/out/` as 16:9 and 1:1 MP4s plus poster stills. See
-[`LAUNCH.md`](LAUNCH.md) for how they map to each channel.
+[`promo/README.md`](promo/README.md) for how the renderer works, and
+[`LAUNCH.md`](LAUNCH.md) for how the clips map to each channel.
 
 ## Launch
 

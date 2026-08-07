@@ -27,7 +27,9 @@ const OUT = join(HERE, "out");
 
 const FPS = 30;
 
-const TOOLS = ["exposed", "mcp", "rag", "explorer"];
+// "suite" is the umbrella clip presenting all four tools; it ships in
+// every repo alongside that repo's own clip.
+const TOOLS = ["suite", "exposed", "mcp", "rag", "explorer"];
 
 const FORMATS = {
   wide: { w: 1920, h: 1080, label: "16x9" },

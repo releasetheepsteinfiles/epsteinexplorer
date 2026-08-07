@@ -82,8 +82,16 @@ posts read as spam and cannibalise each other.
 | 3 | Day 9 (Thu) | `epsteinexplorer` — the app | Show HN, r/OSINT |
 | 4 | Day 16 | `epstein-files-rag-mcp` — when it actually ships | r/LocalLLaMA |
 
-Twitter carries all four waves; it is the connective tissue and the only
-place the whole toolchain is presented as one thing.
+Twitter carries all four waves; it is the connective tissue that presents the
+toolchain as one thing rather than four scattered repos.
+
+**The overview clip (`suite-*`) is what does that connecting**, and it is not
+a wave of its own — shipping it as a standalone "here are four repos" post
+before anything has landed asks people to care about a project they have no
+reason to trust yet. Instead it closes each thread, sits in the pinned tweet
+from Day 0 onward, and heads every README. By Wave 3 a meaningful share of
+readers will have seen it two or three times, which is the point: repetition
+is what turns four announcements into one recognisable project.
 
 **Best posting times** (both platforms skew US): Tue–Thu, 13:00–15:00 UTC.
 Reddit weekend traffic is lower but so is competition — Wave 2 on Saturday
@@ -128,9 +136,27 @@ and autoplays silently, which is what the videos are built for.
 > a semantic-search server, and a chat interface over the whole thing.
 >
 > MIT licensed. github.com/guilyx/epsteinexposed
+> [attach: suite-1x1.mp4]
 
 Put the disclaimer in tweet 3, not the last tweet — most readers never reach
 the end of a thread, and it needs to be seen.
+
+### Pin this
+
+Once Wave 1 is out, pin a standalone tweet carrying the **overview clip**, so
+anyone landing on the profile sees the whole project rather than whichever
+wave happened to be last:
+
+> Open-source tooling for querying publicly released Epstein case records.
+>
+> A Python client, two MCP servers, and a chat interface. Everything cites
+> its source. MIT licensed.
+>
+> github.com/guilyx
+> [attach: suite-1x1.mp4]
+
+Update the pin as tools ship; the clip itself already marks the RAG server
+as planned, so it stays accurate until that changes.
 
 ### Wave 2 — MCP server
 
@@ -234,9 +260,11 @@ drives the ranking far more than the post body does.
 
 **Hacker News** — Wave 3, as `Show HN: EpsteinExplorer – chat interface over
 released Epstein case records`. Submit Tue–Thu ~14:00 UTC. Post a first
-comment explaining the architecture and the sourcing. HN will interrogate
-provenance and neutrality harder than anywhere else; the disclaimer and
-citation design are the strongest cards — lead with them.
+comment explaining the architecture and the sourcing, and link the
+**overview clip** there — HN readers who like the app immediately want to
+know what else is in the stack. HN will interrogate provenance and
+neutrality harder than anywhere else; the disclaimer and citation design are
+the strongest cards, so lead with them.
 
 **MCP directories** — free distribution, do all of them:
 `modelcontextprotocol/servers` (community list PR), Smithery, mcp.so,
@@ -268,16 +296,32 @@ Angle candidates, best first:
 
 ## 8. Assets
 
-Rendered by `promo/render.mjs`, output in `promo/out/`:
+Rendered by `promo/render.mjs`, output in `promo/out/`. **Five clips**, each
+in 16:9 and 1:1 with a poster still:
 
-| File | Use |
+| Prefix | Presents | Where it earns its place |
+|---|---|---|
+| `suite-*` | **Toolchain overview** — all four tools | Pinned tweet, HN first comment, repo READMEs, anywhere someone asks "what is this project?" |
+| `exposed-*` | Python client | Wave 1 |
+| `mcp-*` | MCP server, structured search | Wave 2 |
+| `rag-*` | MCP server, semantic search | Wave 4 |
+| `explorer-*` | Chat app | Wave 3 |
+
+| Format | Use |
 |---|---|
-| `<tool>-16x9.mp4` | YouTube, docs sites, embeds, HN |
-| `<tool>-1x1.mp4` | Twitter, Reddit — **the default for social** |
-| `<tool>-poster.png` | README embeds, link previews, PyPI |
+| `-16x9.mp4` | YouTube, docs sites, embeds, HN |
+| `-1x1.mp4` | Twitter, Reddit — **the default for social** |
+| `-poster.png` | README embeds, link previews, PyPI |
 
-All are silent with burned-in text, ~19.6s. Autoplay on both platforms is
+All are silent with burned-in text, 19.6s. Autoplay on both platforms is
 muted, so nothing depends on audio.
+
+**The overview clip is the one that does the most work.** Each wave sells one
+tool; `suite-*` is what makes the four read as a project rather than four
+scattered repos, and it is the right attachment any time the audience is
+meeting the work for the first time. Use it in the pinned tweet, the last
+tweet of each thread, and the READMEs — not as a replacement for the
+tool-specific clip in a wave announcement.
 
 To re-render after a copy change: `cd promo && npm install && npm run render`.
 

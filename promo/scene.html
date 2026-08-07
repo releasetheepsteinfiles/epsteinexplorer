@@ -180,6 +180,31 @@
         text-align: right;
       }
 
+      /* ── Toolchain rows (overview clip) ─────────────────────── */
+      .toolRow {
+        display: flex;
+        align-items: baseline;
+        font-family: var(--mono);
+        border-bottom: 1px solid var(--line);
+      }
+      .toolRow:last-child { border-bottom: 0; }
+
+      .toolNo {
+        color: var(--ember);
+        letter-spacing: .12em;
+        flex: 0 0 auto;
+      }
+      .toolName { color: var(--bright); font-weight: 600; flex: 0 0 auto; }
+      .toolRole { color: var(--subtle); flex: 1 1 auto; }
+      .toolBadge {
+        color: var(--ember);
+        border: 1px solid var(--ember-dim);
+        border-radius: 2px;
+        text-transform: uppercase;
+        letter-spacing: .1em;
+        flex: 0 0 auto;
+      }
+
       /* ── Chat bubbles (explorer) ────────────────────────────── */
       .bubbleUser {
         align-self: flex-end;
@@ -251,6 +276,35 @@
       // No person is named in any promo asset: inclusion in these
       // records is not an accusation. See brand/DESIGN.md § Ethics.
       const TOOLS = {
+        // The umbrella clip: presents all four tools as one toolchain.
+        // Same five-scene structure and length as the others, so it sits
+        // in the set rather than looking like a different production.
+        suite: {
+          file: "Overview",
+          nameA: "Epstein Files", nameB: " Toolchain",
+          kicker: "Four open-source tools",
+          pitch: "Four tools.\nOne public record.",
+          sub: "A Python client, two MCP servers and a chat interface — one dataset, one design system.",
+          panelTitle: "toolchain",
+          panelTag: "overview",
+          suite: true,
+          tools: [
+            { no: "01", name: "epsteinexposed", role: "Python client · sync + async", badge: null },
+            { no: "02", name: "epsteinexposed-mcp", role: "MCP · structured search", badge: null },
+            { no: "03", name: "epstein-files-rag-mcp", role: "MCP · semantic search", badge: "Planned" },
+            { no: "04", name: "epsteinexplorer", role: "Natural-language chat app", badge: null },
+          ],
+          results: [
+            "One dataset · publicly released records",
+            "Every result carries a citation",
+            "MIT licensed · self-hostable",
+          ],
+          illusText: "Four repositories",
+          install: "pip install epsteinexposed",
+          url: "github.com/guilyx",
+          badge: null,
+        },
+
         exposed: {
           file: "File 01",
           nameA: "epstein", nameB: "exposed",
@@ -438,23 +492,41 @@
         `;
 
         // Scene C — demo
-        const codeHtml = cfg.chat ? "" : cfg.code.map((_, i) => `<span class="ln" id="cl${i}"></span>`).join("");
-        const chatHtml = cfg.chat
-          ? `<div style="display:flex;flex-direction:column;gap:${px(14 * S.k)};padding:${px(22 * S.k)}">
+        let bodyHtml;
+        if (cfg.chat) {
+          bodyHtml = `<div style="display:flex;flex-direction:column;gap:${px(14 * S.k)};padding:${px(22 * S.k)}">
                <div class="bubbleUser" id="chU" style="font-size:${px(S.code)};padding:${px(13 * S.k)} ${px(17 * S.k)};max-width:78%"></div>
                <div class="bubbleBot"  id="chB" style="font-size:${px(S.code)};padding:${px(13 * S.k)} ${px(17 * S.k)};max-width:88%;line-height:1.55"></div>
-             </div>`
-          : `<div class="panelBody" id="cCode" style="font-size:${px(S.code)};padding:${px(22 * S.k)};line-height:1.75">${codeHtml}</div>`;
+             </div>`;
+        } else if (cfg.suite) {
+          const rowFont = Math.round(S.code * 0.86);
+          bodyHtml =
+            `<div style="padding:${px(6 * S.k)} ${px(22 * S.k)}">` +
+            cfg.tools
+              .map(
+                (t, i) => `<div class="toolRow" id="tr${i}" style="font-size:${px(rowFont)};gap:${px(14 * S.k)};padding:${px(13 * S.k)} 0">
+                     <span class="toolNo">${t.no}</span>
+                     <span class="toolName">${t.name}</span>
+                     <span class="toolRole">${t.role}</span>
+                     ${t.badge ? `<span class="toolBadge" style="font-size:${px(Math.round(rowFont * 0.72))};padding:${px(2 * S.k)} ${px(7 * S.k)}">${t.badge}</span>` : ""}
+                   </div>`,
+              )
+              .join("") +
+            `</div>`;
+        } else {
+          const codeHtml = cfg.code.map((_, i) => `<span class="ln" id="cl${i}"></span>`).join("");
+          bodyHtml = `<div class="panelBody" id="cCode" style="font-size:${px(S.code)};padding:${px(22 * S.k)};line-height:1.75">${codeHtml}</div>`;
+        }
 
         document.getElementById("cC").innerHTML = `
           <div class="panel" id="cPanel" style="width:${px(S.panelW)}">
             <div class="panelBar" style="font-size:${px(S.panelTitle)};padding:${px(11 * S.k)} ${px(16 * S.k)}">
               <span id="cTitle"></span><span id="cTag"></span>
             </div>
-            ${chatHtml}
+            ${bodyHtml}
             <div id="cRes"></div>
           </div>
-          <div class="illus" id="cIllus" style="font-size:${px(S.panelTitle)};width:${px(S.panelW)};margin-top:${px(10 * S.k)}">Illustrative output</div>
+          <div class="illus" id="cIllus" style="font-size:${px(S.panelTitle)};width:${px(S.panelW)};margin-top:${px(10 * S.k)}">${cfg.illusText || "Illustrative output"}</div>
         `;
         document.getElementById("cTitle").textContent = cfg.panelTitle;
         document.getElementById("cTag").textContent = cfg.panelTag;
@@ -527,7 +599,10 @@
           document.getElementById("aKick").textContent = cfg.kicker.toUpperCase();
           const p = easeInOut(inv(t, 380, 1750));
           // The bar retracts to reveal the product's OWN name only.
-          const barW = (1 - p) * S.logo * 7.2;
+          // Scale the bar to the actual logotype width (JetBrains Mono
+          // advance is ~0.6em) so long names reveal fully, not halfway.
+          const nameLen = (cfg.nameA + cfg.nameB).length;
+          const barW = (1 - p) * nameLen * S.logo * 0.62;
           const nameHtml = `${cfg.nameA}<span class="accent">${cfg.nameB}</span>`;
           document.getElementById("aLogo").innerHTML =
             barW > 2
@@ -560,6 +635,15 @@
             const pb = inv(t, c0 + 3100, c0 + 6100);
             b.textContent = typedLen(cfg.botMsg, pb);
             b.style.opacity = pb > 0 ? 1 : 0;
+          } else if (cfg.suite) {
+            // Toolchain rows slide in one at a time — same stagger the
+            // result rows use, so the whole set shares a motion language.
+            cfg.tools.forEach((_, i) => {
+              const row = document.getElementById("tr" + i);
+              const p = easeOut(inv(t, c0 + 420 + i * 400, c0 + 420 + i * 400 + 520));
+              row.style.opacity = p.toFixed(3);
+              row.style.transform = `translateX(${((1 - p) * 14 * S.k).toFixed(2)}px)`;
+            });
           } else {
             // type the code block character-by-character across lines
             const flat = cfg.code.map((ln) => ln.map((s) => s[0]).join(""));
@@ -583,7 +667,7 @@
           }
 
           // results stagger in
-          const rs = cfg.chat ? c0 + 6500 : c0 + 4700;
+          const rs = cfg.chat ? c0 + 6500 : cfg.suite ? c0 + 2500 : c0 + 4700;
           cfg.results.forEach((_, i) => {
             const row = document.getElementById("rr" + i);
             const p = easeOut(inv(t, rs + i * 330, rs + i * 330 + 480));
