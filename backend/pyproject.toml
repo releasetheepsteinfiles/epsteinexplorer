@@ -28,7 +28,9 @@ dev = [
     "pytest-cov>=6.0.0",
     "aiosqlite>=0.20.0",
     "httpx>=0.27.0",
-    "ruff>=0.8.0",
+    # <0.16.0: see epsteinexposed's pyproject.toml for why — keeps local
+    # installs from drifting past the version CI pins.
+    "ruff>=0.8.0,<0.16.0",
 ]
 
 [tool.pytest.ini_options]
