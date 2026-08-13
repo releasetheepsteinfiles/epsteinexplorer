@@ -5,10 +5,10 @@ Go-to-market for the four tools, now that they share one visual language
 
 | Repo | What it is | Ship state |
 |---|---|---|
-| [`epsteinexposed`](https://github.com/guilyx/epsteinexposed) | Python client | On PyPI, v0.2.0 |
-| [`epsteinexposed-mcp`](https://github.com/guilyx/epsteinexposed-mcp) | MCP server, structured search | Working |
-| [`epstein-files-rag-mcp`](https://github.com/guilyx/epstein-files-rag-mcp) | MCP server, semantic search | **In development** |
-| [`epsteinexplorer`](https://github.com/guilyx/epsteinexplorer) | Chat app | Working |
+| [`epsteinexposed`](https://github.com/releasetheepsteinfiles/epsteinexposed) | Python client | On PyPI, v0.2.0 |
+| [`epsteinexposed-mcp`](https://github.com/releasetheepsteinfiles/epsteinexposed-mcp) | MCP server, structured search | Working |
+| [`epstein-files-rag-mcp`](https://github.com/releasetheepsteinfiles/epstein-files-rag-mcp) | MCP server, semantic search | **In development** |
+| [`epsteinexplorer`](https://github.com/releasetheepsteinfiles/epsteinexplorer) | Chat app | Working |
 
 ---
 
@@ -135,7 +135,7 @@ and autoplays silently, which is what the videos are built for.
 > Three more pieces coming: an MCP server so agents can query the records,
 > a semantic-search server, and a chat interface over the whole thing.
 >
-> MIT licensed. github.com/guilyx/epsteinexposed
+> MIT licensed. github.com/releasetheepsteinfiles/epsteinexposed
 > [attach: suite-1x1.mp4]
 
 Put the disclaimer in tweet 3, not the last tweet — most readers never reach
@@ -176,7 +176,7 @@ as planned, so it stays accurate until that changes.
 > EpsteinExplorer is a chat interface over the released records. Every
 > answer links back to the document it came from.
 >
-> Live: [demo URL] · Source: github.com/guilyx/epsteinexplorer
+> Live: [demo URL] · Source: github.com/releasetheepsteinfiles/epsteinexplorer
 > [attach: explorer-1x1.mp4]
 
 ### Twitter notes

@@ -2,16 +2,16 @@
 
 > Credits: Erwin Lejeune — 2026-02-23
 
-[![CI](https://github.com/guilyx/epsteinexplorer/actions/workflows/ci.yml/badge.svg)](https://github.com/guilyx/epsteinexplorer/actions/workflows/ci.yml)
+[![CI](https://github.com/releasetheepsteinfiles/epsteinexplorer/actions/workflows/ci.yml/badge.svg)](https://github.com/releasetheepsteinfiles/epsteinexplorer/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.10+-blue)](https://www.python.org/)
 [![React](https://img.shields.io/badge/react-19-61dafb)](https://react.dev/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 **Natural language research interface for the Epstein case files.**
 
-A full-stack chatbot that lets you explore persons, documents, flight logs, and emails from the Epstein files using natural language — powered by [epsteinexposed](https://github.com/guilyx/epsteinexposed) and [smolagents](https://github.com/huggingface/smolagents).
+A full-stack chatbot that lets you explore persons, documents, flight logs, and emails from the Epstein files using natural language — powered by [epsteinexposed](https://github.com/releasetheepsteinfiles/epsteinexposed) and [smolagents](https://github.com/huggingface/smolagents).
 
-[![EpsteinExplorer](https://raw.githubusercontent.com/guilyx/epsteinexplorer/main/promo/out/explorer-poster.png)](https://raw.githubusercontent.com/guilyx/epsteinexplorer/main/promo/out/explorer-16x9.mp4)
+[![EpsteinExplorer](https://raw.githubusercontent.com/releasetheepsteinfiles/epsteinexplorer/main/promo/out/explorer-poster.png)](https://raw.githubusercontent.com/releasetheepsteinfiles/epsteinexplorer/main/promo/out/explorer-16x9.mp4)
 
 > **Disclaimer:** Inclusion in the Epstein Exposed database does not imply guilt or wrongdoing. All data is derived from publicly released government records, court filings, and verified reporting.
 
@@ -128,16 +128,16 @@ This repository is one of four that share a data source and a design system:
 
 | Repo | Role |
 |---|---|
-| [`epsteinexposed`](https://github.com/guilyx/epsteinexposed) | Python client for the public API |
-| [`epsteinexposed-mcp`](https://github.com/guilyx/epsteinexposed-mcp) | MCP server — structured search |
-| [`epstein-files-rag-mcp`](https://github.com/guilyx/epstein-files-rag-mcp) | MCP server — semantic search *(in development)* |
-| [`epsteinexplorer`](https://github.com/guilyx/epsteinexplorer) | Natural-language chat app *(this repo)* |
+| [`epsteinexposed`](https://github.com/releasetheepsteinfiles/epsteinexposed) | Python client for the public API |
+| [`epsteinexposed-mcp`](https://github.com/releasetheepsteinfiles/epsteinexposed-mcp) | MCP server — structured search |
+| [`epstein-files-rag-mcp`](https://github.com/releasetheepsteinfiles/epstein-files-rag-mcp) | MCP server — semantic search *(in development)* |
+| [`epsteinexplorer`](https://github.com/releasetheepsteinfiles/epsteinexplorer) | Natural-language chat app *(this repo)* |
 
 A 20-second overview of how the four fit together:
 
-[![Epstein Files toolchain](https://raw.githubusercontent.com/guilyx/epsteinexplorer/main/promo/out/suite-poster.png)](https://raw.githubusercontent.com/guilyx/epsteinexplorer/main/promo/out/suite-16x9.mp4)
+[![Epstein Files toolchain](https://raw.githubusercontent.com/releasetheepsteinfiles/epsteinexplorer/main/promo/out/suite-poster.png)](https://raw.githubusercontent.com/releasetheepsteinfiles/epsteinexplorer/main/promo/out/suite-16x9.mp4)
 
-Also related: [LinkedStein](https://github.com/guilyx/LinkedStein) — LinkedIn × Epstein files cross-reference tool.
+Also related: [LinkedStein](https://github.com/releasetheepsteinfiles/LinkedStein) — LinkedIn × Epstein files cross-reference tool.
 
 ## Design system
 

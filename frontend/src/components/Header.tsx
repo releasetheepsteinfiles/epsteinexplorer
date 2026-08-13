@@ -13,7 +13,7 @@ export default function Header() {
           Public records · research tool
         </span>
         <a
-          href="https://github.com/guilyx/epsteinexplorer"
+          href="https://github.com/releasetheepsteinfiles/epsteinexplorer"
           target="_blank"
           rel="noopener noreferrer"
           className="font-mono text-xs text-subtle transition-colors duration-150 hover:text-ember"
